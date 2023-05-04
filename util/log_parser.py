@@ -786,28 +786,28 @@ class LogParser:
     def export_format(self):
         return "json" if self._service.format == "json" else "csv"
 
-class CustomLogParser(LogParser):
-    def parse(self, log_entry):
-        # 调用父类的 parse 方法获取原始解析结果
-        parsed_entry = super().parse(log_entry)
-
-        # 解析 rulegrouplist 字段
-        rule_group_list_str = parsed_entry.get("rulegrouplist", "")
-        print("rule_group_list_str:", rule_group_list_str)
-        rule_group_list = json.loads(rule_group_list_str.replace("=", ":"))
-
-        # 计算 nonterminatingmatchingrules 中出现 COUNT 的次数
-        count_occurrences = 0
-        for group in rule_group_list:
-            non_terminating_matching_rules = group.get("nonterminatingmatchingrules", [])
-            for rule in non_terminating_matching_rules:
-                if rule.get("action") == "COUNT":
-                    count_occurrences += 1
-
-        # 添加新字段 matchingrule
-        parsed_entry["matchingrule"] = count_occurrences
-
-        return parsed_entry
+# class CustomLogParser(LogParser):
+#     def parse(self, log_entry):
+#         # 调用父类的 parse 方法获取原始解析结果
+#         parsed_entry = super().parse(log_entry)
+#
+#         # 解析 rulegrouplist 字段
+#         rule_group_list_str = parsed_entry.get("rulegrouplist", "")
+#         print("rule_group_list_str:", rule_group_list_str)
+#         rule_group_list = json.loads(rule_group_list_str.replace("=", ":"))
+#
+#         # 计算 nonterminatingmatchingrules 中出现 COUNT 的次数
+#         count_occurrences = 0
+#         for group in rule_group_list:
+#             non_terminating_matching_rules = group.get("nonterminatingmatchingrules", [])
+#             for rule in non_terminating_matching_rules:
+#                 if rule.get("action") == "COUNT":
+#                     count_occurrences += 1
+#
+#         # 添加新字段 matchingrule
+#         parsed_entry["matchingrule"] = count_occurrences
+#
+#         return parsed_entry
     
     # def parse(self, line: str) -> dict:
     #     # 使用原有的解析逻辑解析日志条目

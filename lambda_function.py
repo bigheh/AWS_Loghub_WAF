@@ -77,7 +77,7 @@ def lambda_handler(event, _):
         check_index_template()
 
         # parser = LogParser(log_type) 替换
-        parser = CustomLogParser(log_type)
+        parser = LogParser(log_type)
         # Define index name
         # Default to <index-prefix>-<type>-YYYY-MM-DD
         index_name = aos.default_index_name()
@@ -290,7 +290,7 @@ def read_file(s3, key: str):
         raise RuntimeError(f"Unable to process log file {key}")
 
 
-def process_log_file(parser: CustomLogParser, key: str, index_name: str):
+def process_log_file(parser: LogParser, key: str, index_name: str):
     """Read with log file and process the record and load into AOS
 
     Args:
