@@ -240,32 +240,6 @@ class Config(LogType):
         return json_records
 
 
-class WAF(LogType):
-    """An implementation of LogType for WAF Logs"""
-
-    _format = "json"
-
-    def parse(self, line: str):
-        try:
-            json_record = json.loads(line)
-
-            # Extract web acl name, host and user agent
-            json_record["webaclName"] = re.search(
-                "[^/]/webacl/([^/]*)", json_record["webaclId"]
-            ).group(1)
-            headers = json_record["httpRequest"]["headers"]
-            for header in headers:
-                if header["name"].lower() == "host":
-                    json_record["host"] = header["value"]
-                elif header["name"].lower() == "user-agent":
-                    json_record["userAgent"] = header["value"]
-                else:
-                    continue
-            return json_record
-        except Exception as e:
-            logger.error(e)
-            return {}
-
 
 class S3(LogType):
     """An implementation of LogType for S3 Access Logs"""
@@ -768,6 +742,41 @@ class Lambda(LogType):
                 json_records.append(json_record)
 
         return json_records
+
+
+class WAF(LogType):
+    """An implementation of LogType for WAF Logs"""
+
+    _format = "json"
+
+    def parse(self, line: str):
+        try:
+            json_record = json.loads(line)
+
+            # Extract web acl name, host and user agent
+            json_record["webaclName"] = re.search(
+                "[^/]/webacl/([^/]*)", json_record["webaclId"]
+            ).group(1)
+            headers = json_record["httpRequest"]["headers"]
+            for header in headers:
+                if header["name"].lower() == "host":
+                    json_record["host"] = header["value"]
+                elif header["name"].lower() == "user-agent":
+                    json_record["userAgent"] = header["value"]
+                else:
+                    continue
+            #  Check  ruleGroupList  for  "COUNT"  string  and  set  count  accordingly
+            count = "no"
+            for group in json_record.get("ruleGroupList", []):
+                if "COUNT" in group:
+                    count = "match"
+                    break
+            json_record["Count"] = count
+
+            return json_record
+        except Exception as e:
+            logger.error(e)
+            return {}
 
 
 class LogParser:
